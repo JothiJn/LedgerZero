@@ -10,7 +10,8 @@ import { Invoice } from '@/lib/types';
 
 // Demo user id — replace with the real authenticated user's id once
 // Supabase Auth is wired up (see README "Auth" section).
-const DEMO_USER_ID = 'demo-user';
+// Must be a valid UUID to match the Postgres schema.
+const DEMO_USER_ID = '00000000-0000-0000-0000-000000000000';
 
 export default function ImportPage() {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
