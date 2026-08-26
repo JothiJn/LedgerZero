@@ -1,0 +1,31 @@
+Product Requirements Document (PRD)
+Product Name: LedgerZero
+Objective: Automate Scope 3 carbon emission reporting for SMBs by extracting activity data from unstructured operational documents and mapping it to standardized scientific emission factors.
+
+1. Market Context & Target Audience
+Large enterprises face strict SEC and CSRD mandates to report end-to-end supply chain emissions. This forces their SMB suppliers to provide itemized carbon data, a task currently requiring expensive consultants ($20k+).
+
+Primary User (SMB Owner/Manager): Needs compliance with zero learning curve. Time-poor, cost-sensitive, possesses unstructured data (PDFs, emails).
+
+Secondary User (Enterprise Auditor): Requires verifiable, deterministic data. Cannot accept AI-hallucinated figures; needs trace-to-source proof.
+
+2. Core Value Proposition
+Transforming multi-week manual carbon audits into a seamless, automated software process through an AI-powered document extraction pipeline.
+
+3. Functional Requirements (MVP Scope)
+
+Document Ingestion: Support for drag-and-drop PDF uploads and email forwarding.
+
+Data Extraction (OCR + LLM): Isolate item descriptions, quantities, units, and shipping distances/modes from unstructured text.
+
+Database Matching: Fuzzy-match extracted items to established emission databases (US EPA, DEFRA).
+
+Deterministic Calculation Engine: Execute the standard formula (Activity Data × Emission Factor) strictly outside the LLM.
+
+Audit-Trace UI: A split-screen interface displaying the original document alongside the extracted data, with interactive bounding boxes linking calculations to source text.
+
+4. Success Metrics (KPIs)
+
+Extraction Accuracy Rate: >95% success in correctly identifying quantity, unit, and material.
+
+Time-to-Value: <2 minutes from document upload to final carbon calculation.
