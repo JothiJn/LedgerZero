@@ -136,10 +136,11 @@ def process_invoice(invoice_id: str, file_url: str):
         }).eq("id", invoice_id).execute()
 
 @app.post("/webhook/ledgerzero-ingest")
-def handle_webhook(payload: WebhookPayload, background_tasks: BackgroundTasks):
-    # Process asynchronously to return 200 immediately to the frontend
-    background_tasks.add_task(process_invoice, payload.invoice_id, payload.file_url)
-    return {"status": "ok", "message": "Invoice processing started"}
+def handle_webhook(payload: WebhookPayload):
+    # Vercel Serverless Functions immediately freeze the container after a response is returned.
+    # Therefore, FastAPI BackgroundTasks do not work on Vercel. We must process synchronously.
+    process_invoice(payload.invoice_id, payload.file_url)
+    return {"status": "ok", "message": "Invoice processing finished"}
 
 @app.get("/health")
 def health_check():
