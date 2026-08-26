@@ -43,6 +43,20 @@ CREATE POLICY "Users can view own invoices" ON invoices
 -- Note: The n8n backend will use the Service Role Key, 
 -- which automatically bypasses these RLS policies to perform updates.
 
+-- 4. Create Storage Bucket and Policies
+INSERT INTO storage.buckets (id, name, public) VALUES ('invoices', 'invoices', true) ON CONFLICT DO NOTHING;
+
+CREATE POLICY "Allow anonymous uploads" ON storage.objects FOR INSERT WITH CHECK (bucket_id = 'invoices');
+CREATE POLICY "Allow anonymous reads" ON storage.objects FOR SELECT USING (bucket_id = 'invoices');
+
+-- Fix invoices table for anonymous testing (Drop foreign key so we don't need real users)
+ALTER TABLE invoices DROP CONSTRAINT IF EXISTS invoices_user_id_fkey;
+CREATE POLICY "Allow anonymous inserts" ON invoices FOR INSERT WITH CHECK (true);
+-- Overwrite previous restrictive select policy
+DROP POLICY IF EXISTS "Users can view own invoices" ON invoices;
+CREATE POLICY "Allow anonymous selects" ON invoices FOR SELECT USING (true);
+
+
 -- 5. Insert Real-World Seed Data (from standard emission databases)
 INSERT INTO emission_factors (item_name, factor, unit, source) VALUES
     ('Beef Production', 60.0, 'kgCO2e/kg', 'Database Average'),
