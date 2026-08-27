@@ -77,22 +77,27 @@ export async function uploadInvoice(
   if (error) throw error;
 
   // Trigger the Python Backend Webhook
-  const webhookUrl = process.env.NEXT_PUBLIC_BACKEND_WEBHOOK_URL;
+  const webhookUrl = '/api/webhook/ledgerzero-ingest';
+  
   if (webhookUrl) {
     try {
-      await fetch(webhookUrl, {
+      const webhookResponse = await fetch(webhookUrl, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({
           invoice_id: data.id,
-          file_url: data.file_url,
+          file_url: urlData.publicUrl,
         }),
       });
+
+      if (!webhookResponse.ok) {
+        console.error('Webhook failed:', webhookResponse.statusText);
+      }
     } catch (webhookErr) {
       console.error('Warning: Failed to trigger backend webhook', webhookErr);
     }
-  } else {
-    console.warn('NEXT_PUBLIC_BACKEND_WEBHOOK_URL is not set. Backend will not process the invoice.');
   }
 
   return data as Invoice;

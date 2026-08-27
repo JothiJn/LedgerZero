@@ -6,7 +6,7 @@ from fastapi import FastAPI, HTTPException, BackgroundTasks
 from pydantic import BaseModel, Field
 from typing import Dict, Any
 
-from app.calculator import calculate_emissions
+from api.calculator import calculate_emissions
 
 # Supabase
 from supabase import create_client, Client
