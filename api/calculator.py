@@ -1,4 +1,4 @@
-from app.conversions import convert_to_base_unit
+from conversions import convert_to_base_unit
 
 def calculate_emissions(item: str, quantity: float, unit: str, factor: float, factor_unit: str) -> dict:
     """
