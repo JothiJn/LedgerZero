@@ -26,14 +26,13 @@ export async function fetchInvoice(id: string): Promise<Invoice | undefined> {
 export async function fetchExtractedItems(invoiceId?: string): Promise<ExtractedItem[]> {
   if (isDemoMode) {
     return invoiceId
-      ? demoExtractedItems.filter((e) => e.invoice_id === invoiceId)
+      ? demoExtractedItems.filter((i) => i.invoice_id === invoiceId)
       : [...demoExtractedItems];
   }
-  let query = supabase!.from('extracted_items').select('*').order('created_at', { ascending: false });
-  if (invoiceId) query = query.eq('invoice_id', invoiceId);
-  const { data, error } = await query;
-  if (error) throw error;
-  return data as ExtractedItem[];
+  if (!invoiceId) return [];
+  const res = await fetch(`/api/invoices/${invoiceId}/items`);
+  if (!res.ok) throw new Error('Failed to fetch extracted items');
+  return res.json();
 }
 
 export async function fetchEmissionFactors(): Promise<EmissionFactor[]> {
