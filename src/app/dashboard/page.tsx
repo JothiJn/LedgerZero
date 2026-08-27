@@ -8,6 +8,20 @@ import BarChart from '@/components/BarChart';
 import { fetchInvoices } from '@/lib/data';
 import { Invoice } from '@/lib/types';
 
+function getShortFileName(fileUrl: string): string {
+  try {
+    const parts = fileUrl.split('/');
+    let filename = parts[parts.length - 1];
+    const dashIdx = filename.indexOf('-');
+    if (dashIdx > 0 && dashIdx < 20) {
+      filename = filename.substring(dashIdx + 1);
+    }
+    return decodeURIComponent(filename);
+  } catch {
+    return 'Invoice';
+  }
+}
+
 export default function DashboardPage() {
   const [invoices, setInvoices] = useState<Invoice[] | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -31,7 +45,7 @@ export default function DashboardPage() {
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([label, value]) => ({ label, value }));
 
-  const donutSegments = processed.map((i) => ({ label: i.file_url, value: i.total_co2e }));
+  const donutSegments = processed.map((i) => ({ label: getShortFileName(i.file_url), value: i.total_co2e }));
 
   return (
     <>
