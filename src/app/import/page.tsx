@@ -23,7 +23,7 @@ export default function ImportPage() {
       setLoading(false);
     });
 
-    // Realtime subscription: keeps status pills live as n8n processes
+    // Realtime subscription: keeps status pills live as backend processes
     // documents, with no polling. No-ops automatically in demo mode.
     if (!isDemoMode && supabase) {
       const channel = supabase
@@ -32,6 +32,10 @@ export default function ImportPage() {
           'postgres_changes',
           { event: '*', schema: 'public', table: 'invoices' },
           (payload) => {
+            if (payload.eventType === 'DELETE') {
+              setInvoices((prev) => prev.filter((i) => i.id !== (payload.old as any).id));
+              return;
+            }
             setInvoices((prev) => {
               const updated = payload.new as Invoice;
               const exists = prev.some((i) => i.id === updated.id);
@@ -57,7 +61,11 @@ export default function ImportPage() {
   }
 
   function handleRetried(id: string) {
-    setInvoices((prev) => prev.map((i) => (i.id === id ? { ...i, status: 'Pending' } : i)));
+    setInvoices((prev) => prev.map((i) => (i.id === id ? { ...i, status: 'Pending' as const } : i)));
+  }
+
+  function handleDeleted(id: string) {
+    setInvoices((prev) => prev.filter((i) => i.id !== id));
   }
 
   return (
@@ -69,7 +77,7 @@ export default function ImportPage() {
         {loading ? (
           <div className="text-sm text-gray-400">Loading...</div>
         ) : (
-          <InvoiceTable invoices={invoices} onRetried={handleRetried} />
+          <InvoiceTable invoices={invoices} onRetried={handleRetried} onDeleted={handleDeleted} />
         )}
       </div>
     </>

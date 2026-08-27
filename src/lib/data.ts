@@ -109,8 +109,36 @@ export async function retryInvoice(id: string): Promise<void> {
     if (inv) inv.status = 'Pending';
     return;
   }
+
+  // Reset status to Pending
   const { error } = await supabase!.from('invoices').update({ status: 'Pending' }).eq('id', id);
   if (error) throw error;
+
+  // Re-trigger the webhook
+  const { data: invoice } = await supabase!.from('invoices').select('file_url').eq('id', id).single();
+  if (invoice?.file_url) {
+    try {
+      await fetch('/api/webhook/ledgerzero-ingest', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ invoice_id: id, file_url: invoice.file_url }),
+      });
+    } catch (_) { /* webhook error handled by backend */ }
+  }
+}
+
+export async function deleteInvoice(id: string): Promise<void> {
+  if (isDemoMode) {
+    const idx = demoInvoices.findIndex((i) => i.id === id);
+    if (idx !== -1) demoInvoices.splice(idx, 1);
+    return;
+  }
+  const resp = await fetch('/api/invoices/delete', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ invoice_id: id }),
+  });
+  if (!resp.ok) throw new Error('Delete failed');
 }
 
 // Demo-only: fakes the n8n pipeline advancing a Pending invoice through to
@@ -130,3 +158,4 @@ export function simulateDemoPipeline(id: string, onUpdate: (inv: Invoice) => voi
     }
   }, 3600);
 }
+
