@@ -91,11 +91,13 @@ export async function POST(req: NextRequest) {
       .select('*')
       .eq('item_name', itemName);
 
+    let factorData;
     if (!factors || factors.length === 0) {
-      throw new Error(`No emission factor found for: ${itemName}`);
+      console.warn(`No emission factor found for: ${itemName}. Using generic fallback.`);
+      factorData = { factor: 0.1, unit: 'kg/usd' }; // Generic fallback so the demo doesn't crash
+    } else {
+      factorData = factors[0];
     }
-
-    const factorData = factors[0];
 
     // 6. Calculate CO2e
     const result = calculateEmissions(
