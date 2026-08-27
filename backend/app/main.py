@@ -58,12 +58,17 @@ def process_invoice(invoice_id: str, file_url: str):
         # 3. AI Extraction (Primary: Gemini)
         extracted_data = None
         try:
+            # Determine correct mime type for Gemini
+            mime_type = "application/pdf" if file_url.lower().endswith(".pdf") else "image/jpeg"
+            if file_url.lower().endswith(".png"):
+                mime_type = "image/png"
+
             model = genai.GenerativeModel("gemini-1.5-pro")
             prompt = "Extract the item, quantity, and unit from this invoice. Return ONLY the JSON schema defined in api_contracts.md. If this is a freight/shipping invoice with weight and distance, multiply the weight by the distance and return the result as 'ton-mile' or 'ton-km'. If there are no physical metrics, use the total cost as a fallback (unit: 'usd')."
             
             contents = [
                 prompt,
-                {"mime_type": "image/jpeg", "data": image_data}
+                {"mime_type": mime_type, "data": image_data}
             ]
             response = model.generate_content(contents)
             text_response = response.text
