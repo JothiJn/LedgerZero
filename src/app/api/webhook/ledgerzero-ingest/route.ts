@@ -66,7 +66,7 @@ export async function POST(req: NextRequest) {
             content: `${prompt}\n\nInvoice file URL: ${fileUrl}`,
           },
         ],
-        model: 'llama3-8b-8192',
+        model: 'qwen/qwen3.8-27b',
       });
 
       let text = chat.choices[0].message.content || '';
